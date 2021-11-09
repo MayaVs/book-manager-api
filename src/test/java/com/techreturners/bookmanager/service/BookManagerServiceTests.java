@@ -81,4 +81,18 @@ public class BookManagerServiceTests {
         verify(mockBookManagerRepository, times(1)).save(book);
     }
 
+    @Test
+    public void testDeleteBookById() {
+        Long bookId = 1L;
+        var book = new Book(1L, "Book Two", "This is the description for Book Two", "Person Two", Genre.Education);
+
+        when(mockBookManagerRepository.findById(bookId)).thenReturn(Optional.of(book));
+
+        bookManagerServiceImpl.deleteBookById(bookId);
+
+        verify(mockBookManagerRepository, times(1)).deleteById(bookId);
+
+    }
+
+
 }

@@ -54,7 +54,7 @@ public class BookManagerControllerTests {
         when(mockBookManagerServiceImpl.getAllBooks()).thenReturn(books);
 
         this.mockMvcController.perform(
-            MockMvcRequestBuilders.get("/api/v1/book/"))
+            MockMvcRequestBuilders.get("/api/v1/book/all"))
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.jsonPath("$[0].id").value(1))
             .andExpect(MockMvcResultMatchers.jsonPath("$[0].title").value("Book One"))
@@ -92,6 +92,31 @@ public class BookManagerControllerTests {
                 .andExpect(MockMvcResultMatchers.status().isCreated());
 
         verify(mockBookManagerServiceImpl, times(1)).insertBook(book);
+    }
+
+    @Test
+    public void testPostMappingAddExistingBook() throws Exception {
+
+        List<Book> books = new ArrayList<>();
+        books.add(new Book(1L, "Book One", "This is the description for Book One", "Person One", Genre.Education));
+        books.add(new Book(2L, "Book Two", "This is the description for Book Two", "Person Two", Genre.Education));
+        books.add(new Book(3L, "Book Three", "This is the description for Book Three", "Person Three", Genre.Education));
+
+        when(mockBookManagerServiceImpl.getAllBooks()).thenReturn(books);
+
+        Book book1 = new Book(2L, "Book Three", "This is the description for Book Three", "Person Three", Genre.Education);
+        Book book = new Book(2L, "Book Two", "This is the description for Book Three", "Person Three", Genre.Education);
+
+        when(mockBookManagerServiceImpl.insertBook(book1)).thenReturn(book1);
+        when(mockBookManagerServiceImpl.insertBook(book)).thenReturn(book);
+
+        this.mockMvcController.perform(
+                        MockMvcRequestBuilders.post("/api/v1/book/")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(mapper.writeValueAsString(book)))
+                .andExpect(MockMvcResultMatchers.status().isNotAcceptable());
+
+        verify(mockBookManagerServiceImpl, times(0)).insertBook(book);
     }
 
     //User Story 4 - Update Book By Id Solution
